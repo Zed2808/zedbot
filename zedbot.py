@@ -1,9 +1,10 @@
 import socket
-import re
+import threading
 
 import config
 import irc
 import twitch
+import threads
 
 # Get channel id from channel name
 channel_id = twitch.get_channel_id(config.channel)
@@ -29,39 +30,7 @@ irc.join_channel(c, channel)
 
 print(f'Connected to {config.channel}\'s chat')
 
-data = ''
-
-while True:
-    try:
-        # Get new data
-        data = data + c.recv(1024).decode()
-
-        # Split data to get only new data
-        data_split = re.split(r'[\r\n]+', data)
-        data = data_split.pop()
-
-        # For each line in the new data
-        for line in data_split:
-            # Split line
-            line = line.split()
-
-            # If data is a regular chat message
-            if line[1] == 'PRIVMSG':
-                # Get message details
-                sender = irc.get_sender(line)
-                message = irc.get_message(line)
-                channel = line[2]
-
-                print(f'{sender}: {message}')
-
-                # Split message into list
-                msg = message.split()
-
-                # !hi
-                if msg[0] == '!hi':
-                    irc.send_message(c, channel, f'Hi {sender}! <3')
-
-    except socket.error:
-        print('SOCKET ERROR')
-    except socket.timeout:
-        print('SOCKET TIMEOUT')
+# Create and run thread to handle IRC communications
+irc_manager = threads.IRCManager(c)
+irc_thread = threading.Thread(target=irc_manager.run)
+irc_thread.start()
