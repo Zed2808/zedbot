@@ -12,6 +12,10 @@ class IRCManager():
         self.connection = connection
 
     def run(self):
+        # Ask the IRC server for a list of channel mods
+        self.connection.send('CAP REQ :twitch.tv/commands\r\n'.encode())
+        irc.send_message(self.connection, '#ibunnib', '.mods')
+
         data = ''
         while True:
             try:
@@ -27,6 +31,19 @@ class IRCManager():
                     # Split line
                     line = line.split()
 
+                    # If data is of type NOTICE
+                    if line[1] == 'NOTICE':
+                        msg = irc.get_message(line)
+
+                        # If the notice is the moderator list
+                        if 'The moderators of this room are:' in msg:
+                            # Store the list of mods
+                            print('> Reading moderator list...')
+                            users = msg.split(':')[1]
+                            users = users.split(',')
+                            self.mods = [user.lstrip() for user in users]
+                            print(f'> Moderators: {self.mods}')
+
                     # If data is a regular chat message
                     if line[1] == 'PRIVMSG':
                         # Get message details
@@ -34,14 +51,18 @@ class IRCManager():
                         msg = irc.get_message(line)
                         channel = line[2]
 
-                        print(f'{sender}: {msg}')
+                        # If sender is a moderator
+                        if sender in self.mods:
+                            print(f'[M] {sender}: {msg}')
+                        else:
+                            print(f'{sender}: {msg}')
 
                         # !hi
                         if msg.split()[0] == '!hi':
                             irc.send_message(self.connection, channel, f'Hi {sender}! <3')
 
                         # !title
-                        if msg.split()[0] == '!title':
+                        if msg.split()[0] == '!title' and sender in self.mods:
                             title = msg.split('!title')[1].lstrip()
                             print(f'> Changing stream title to "{title}"')
                             twitch.set_stream_title(self.channel_id, title)
