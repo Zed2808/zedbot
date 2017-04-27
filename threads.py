@@ -7,7 +7,8 @@ import irc
 import twitch
 
 class IRCManager():
-    def __init__(self, connection):
+    def __init__(self, channel_id, connection):
+        self.channel_id = channel_id
         self.connection = connection
 
     def run(self):
@@ -30,17 +31,21 @@ class IRCManager():
                     if line[1] == 'PRIVMSG':
                         # Get message details
                         sender = irc.get_sender(line)
-                        message = irc.get_message(line)
+                        msg = irc.get_message(line)
                         channel = line[2]
 
-                        print(f'{sender}: {message}')
-
-                        # Split message into list
-                        msg = message.split()
+                        print(f'{sender}: {msg}')
 
                         # !hi
-                        if msg[0] == '!hi':
+                        if msg.split()[0] == '!hi':
                             irc.send_message(self.connection, channel, f'Hi {sender}! <3')
+
+                        # !title
+                        if msg.split()[0] == '!title':
+                            title = msg.split('!title')[1].lstrip()
+                            print(f'> Changing stream title to "{title}"')
+                            twitch.set_stream_title(self.channel_id, title)
+                            irc.send_message(self.connection, channel, f'Set stream title to "{title}"')
 
             except socket.error:
                 print('> SOCKET ERROR')
@@ -48,13 +53,11 @@ class IRCManager():
                 print('> SOCKET TIMEOUT')
 
 class NewFollowerManager():
-    def __init__(self, connection):
+    def __init__(self, channel_id, connection):
+        self.channel_id = channel_id
         self.connection = connection
 
     def run(self):
-        # Get channel id from channel name
-        self.channel_id = twitch.get_channel_id(config.channel)
-
         # Get initial list of follower ids from channel id
         self.followers = twitch.get_follower_ids(self.channel_id)
 

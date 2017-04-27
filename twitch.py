@@ -38,3 +38,15 @@ def get_username_by_id(id):
     data = json.loads(r.text)
 
     return data['display_name']
+
+def set_stream_title(channel_id, title):
+    headers = {'Accept': 'application/vnd.twitchtv.v5+json',
+               'Client-ID': config.client_id,
+               'Authorization': 'OAuth ' + config.oauth,
+               'Content-Type': 'application/json'}
+
+    url = f'https://api.twitch.tv/kraken/channels/{channel_id}'
+
+    data = json.dumps({'channel': {'status': title}})
+
+    r = requests.put(url, headers=headers, data=data)
