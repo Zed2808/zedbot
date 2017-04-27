@@ -6,11 +6,9 @@ import irc
 import twitch
 import threads
 
-# Get channel id from channel name
-channel_id = twitch.get_channel_id(config.channel)
-
-# Get initial list of follower ids from channel id
-followers = twitch.get_follower_ids(channel_id)
+##############################################
+# Set up IRC communications with Twitch chat #
+##############################################
 
 # IRC connection arguments
 server = 'irc.twitch.tv'
@@ -28,9 +26,22 @@ irc.send_pass(c, password)
 irc.send_nick(c, nickname)
 irc.join_channel(c, channel)
 
-print(f'Connected to {config.channel}\'s chat')
+print(f'> Connected to {config.channel}\'s chat')
 
 # Create and run thread to handle IRC communications
 irc_manager = threads.IRCManager(c)
 irc_thread = threading.Thread(target=irc_manager.run)
 irc_thread.start()
+
+print('> Started IRC thread...')
+
+#############################
+# Set up Twitch API threads #
+#############################
+
+# Create and run new follower alert thread
+new_follower_manager = threads.NewFollowerManager(c)
+new_follower_thread = threading.Thread(target=new_follower_manager.run)
+new_follower_thread.start()
+
+print('> Started new follower thread...')

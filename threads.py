@@ -1,7 +1,10 @@
 import socket
 import re
+import time
 
+import config
 import irc
+import twitch
 
 class IRCManager():
     def __init__(self, connection):
@@ -40,6 +43,37 @@ class IRCManager():
                             irc.send_message(self.connection, channel, f'Hi {sender}! <3')
 
             except socket.error:
-                print('SOCKET ERROR')
+                print('> SOCKET ERROR')
             except socket.timeout:
-                print('SOCKET TIMEOUT')
+                print('> SOCKET TIMEOUT')
+
+class NewFollowerManager():
+    def __init__(self, connection):
+        self.connection = connection
+
+    def run(self):
+        # Get channel id from channel name
+        self.channel_id = twitch.get_channel_id(config.channel)
+
+        # Get initial list of follower ids from channel id
+        self.followers = twitch.get_follower_ids(self.channel_id)
+
+        while True:
+            # Get current list of channel followers
+            current_followers = twitch.get_follower_ids(self.channel_id)
+
+            # Iterate through current followers
+            for follower in current_followers:
+                # If the current follower wasn't already in the list of followers from before
+                if follower not in self.followers:
+                    # Get follower's display name from their id
+                    follower_name = twitch.get_username_by_id(follower)
+                    print(f'> New follower: {follower_name}')
+
+                    # Welcome new follower in chat
+                    irc.send_message(self.connection, '#' + config.channel, f'Welcome {follower_name}!')
+
+            # Save current followers to check against
+            self.followers = current_followers
+
+            time.sleep(5)

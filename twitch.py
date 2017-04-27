@@ -26,3 +26,15 @@ def get_follower_ids(channel_id):
     data = json.loads(r.text)
 
     return [follower['user']['_id'] for follower in data['follows']]
+
+def get_username_by_id(id):
+    headers = {'Accept': 'application/vnd.twitchtv.v5+json',
+               'Client-ID': config.client_id}
+
+    url = f'https://api.twitch.tv/kraken/users/{id}'
+
+    r = requests.get(url, headers=headers)
+
+    data = json.loads(r.text)
+
+    return data['display_name']
