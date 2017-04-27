@@ -2,22 +2,16 @@ import socket
 import re
 
 import config
-from irc import *
-from twitch_api import *
+import irc
+import twitch
 
 # Get channel id from channel name
-channel_id = get_channel_id(config.channel)
+channel_id = twitch.get_channel_id(config.channel)
 
-# Get list of follower ids from channel id
-followers = get_follower_ids(channel_id)
+# Get initial list of follower ids from channel id
+followers = twitch.get_follower_ids(channel_id)
 
-# Print channel followers in plaintext
-# for user in followers['follows']:
-#     print(user['user']['display_name'])
-
-#############
-# IRC STUFF #
-#############
+# IRC connection arguments
 server = 'irc.twitch.tv'
 nickname = config.username
 channel = '#' + config.channel
@@ -28,9 +22,10 @@ password = config.oauth
 c = socket.socket()
 c.connect((server, port))
 
-send_pass(c, password)
-send_nick(c, nickname)
-join_channel(c, channel)
+# Send server authentication and join channel
+irc.send_pass(c, password)
+irc.send_nick(c, nickname)
+irc.join_channel(c, channel)
 
 print(f'Connected to {config.channel}\'s chat')
 
@@ -53,8 +48,8 @@ while True:
             # If data is a regular chat message
             if line[1] == 'PRIVMSG':
                 # Get message details
-                sender = get_sender(line)
-                message = get_message(line)
+                sender = irc.get_sender(line)
+                message = irc.get_message(line)
                 channel = line[2]
 
                 print(f'{sender}: {message}')
@@ -64,7 +59,7 @@ while True:
 
                 # !hi
                 if msg[0] == '!hi':
-                    send_message(c, channel, f'Hi {sender}! <3')
+                    irc.send_message(c, channel, f'Hi {sender}! <3')
 
     except socket.error:
         print('SOCKET ERROR')
