@@ -42,6 +42,8 @@ class IRCManager():
                             users = msg.split(':')[1]
                             users = users.split(',')
                             self.mods = [user.lstrip() for user in users]
+                            # Add the channel owner to list of mods
+                            self.mods.append(config.channel)
                             print(f'> Moderators: {self.mods}')
 
                     # If data is a regular chat message
