@@ -7,13 +7,9 @@ from twitch_api import *
 
 # Get channel id from channel name
 channel_id = get_channel_id(config.channel)
-# print(channel_id)
 
-# Get list of followers from channel id
-followers = get_channel_followers(channel_id)
-# print(json.dumps(followers, indent=4))
-
-# Should make a list comprehension for a list of follower ids
+# Get list of follower ids from channel id
+followers = get_follower_ids(channel_id)
 
 # Print channel followers in plaintext
 # for user in followers['follows']:
@@ -35,6 +31,8 @@ c.connect((server, port))
 send_pass(c, password)
 send_nick(c, nickname)
 join_channel(c, channel)
+
+print(f'Connected to {config.channel}\'s chat')
 
 data = ''
 

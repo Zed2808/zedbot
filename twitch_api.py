@@ -15,7 +15,7 @@ def get_channel_id(channel):
 
     return data['users'][0]['_id']
 
-def get_channel_followers(channel_id):
+def get_follower_ids(channel_id):
     headers = {'Accept': 'application/vnd.twitchtv.v5+json',
                'Client-ID': config.client_id}
 
@@ -23,4 +23,6 @@ def get_channel_followers(channel_id):
 
     r = requests.get(url, headers=headers)
 
-    return json.loads(r.text)
+    data = json.loads(r.text)
+
+    return [follower['user']['_id'] for follower in data['follows']]
