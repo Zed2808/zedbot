@@ -1,10 +1,12 @@
 import socket
 import re
 import time
+import random
 
 import config
 import irc
 import twitch
+import quotes
 
 class IRCManager():
     def __init__(self, channel_id, connection):
@@ -70,6 +72,11 @@ class IRCManager():
                             twitch.set_stream_title(self.channel_id, title)
                             irc.send_message(self.connection, channel, f'Set stream title to "{title}"')
 
+                        # !mercy
+                        if msg.split()[0] == '!mercy':
+                            quote = random.choice(quotes.mercy)
+                            irc.send_message(self.connection, channel, quote)
+
             except socket.error:
                 print('> SOCKET ERROR')
             except socket.timeout:
@@ -97,7 +104,7 @@ class NewFollowerManager():
                     print(f'> New follower: {follower_name}')
 
                     # Welcome new follower in chat
-                    irc.send_message(self.connection, '#' + config.channel, f'Welcome {follower_name}!')
+                    irc.send_message(self.connection, '#' + config.channel, f'Welcome {follower_name}! <3')
 
             # Save current followers to check against
             self.followers = current_followers
