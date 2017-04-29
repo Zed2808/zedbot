@@ -40,13 +40,13 @@ class IRCManager():
                         # If the notice is the moderator list
                         if 'The moderators of this room are:' in msg:
                             # Store the list of mods
-                            print('> Reading moderator list...')
+                            print('Reading moderator list...')
                             users = msg.split(':')[1]
                             users = users.split(',')
                             self.mods = [user.lstrip() for user in users]
                             # Add the channel owner to list of mods
                             self.mods.append(config.channel)
-                            print(f'> Moderators: {self.mods}')
+                            print(f'Moderators: {self.mods}')
 
                     # If data is a regular chat message
                     if line[1] == 'PRIVMSG':
@@ -55,32 +55,45 @@ class IRCManager():
                         msg = irc.get_message(line)
                         channel = line[2]
 
+                        # Use first word as command
+                        command = msg.split()[0]
+
                         # If sender is a moderator
                         if sender in self.mods:
-                            print(f'[M] {sender}: {msg}')
+                            print(f'> [M] {sender}: {msg}')
                         else:
-                            print(f'{sender}: {msg}')
+                            print(f'> {sender}: {msg}')
 
                         # !hi
-                        if msg.split()[0] == '!hi':
+                        if command == '!hi':
                             irc.send_message(self.connection, channel, f'Hi {sender}! <3')
 
                         # !title
-                        if msg.split()[0] == '!title' and sender in self.mods:
+                        if command == '!title' and sender in self.mods:
                             title = msg.split('!title')[1].lstrip()
-                            print(f'> Changing stream title to "{title}"')
+                            print(f'Changing stream title to "{title}"')
                             twitch.set_stream_title(self.channel_id, title)
                             irc.send_message(self.connection, channel, f'Set stream title to "{title}"')
 
+                        # !genji
+                        if command == '!genji':
+                            quote = random.choice(quotes.genji)
+                            irc.send_message(self.connection, channel, quote)
+
+                        # !hanzo
+                        if command == '!hanzo':
+                            quote = random.choice(quotes.hanzo)
+                            irc.send_message(self.connection, channel, quote)
+
                         # !mercy
-                        if msg.split()[0] == '!mercy':
+                        if command == '!mercy':
                             quote = random.choice(quotes.mercy)
                             irc.send_message(self.connection, channel, quote)
 
             except socket.error:
-                print('> SOCKET ERROR')
+                print('SOCKET ERROR')
             except socket.timeout:
-                print('> SOCKET TIMEOUT')
+                print('SOCKET TIMEOUT')
 
 class NewFollowerManager():
     def __init__(self, channel_id, connection):
@@ -101,7 +114,7 @@ class NewFollowerManager():
                 if follower not in self.followers:
                     # Get follower's display name from their id
                     follower_name = twitch.get_username_by_id(follower)
-                    print(f'> New follower: {follower_name}')
+                    print(f'New follower: {follower_name}')
 
                     # Welcome new follower in chat
                     irc.send_message(self.connection, '#' + config.channel, f'Welcome {follower_name}! <3')

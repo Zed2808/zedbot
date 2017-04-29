@@ -1,3 +1,11 @@
+genji = [
+    'RYUJIN NO KEN WO KURAE!'
+]
+
+hanzo = [
+    'RYU GA WAGA TEKI WO KURAU!'
+]
+
 mercy = [
     'Did someone call a doctor?',
     'Right beside you.',

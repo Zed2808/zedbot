@@ -26,4 +26,4 @@ def get_message(msg):
 
 def send_message(connection, channel, msg):
     connection.send(f'PRIVMSG {channel} :{msg}\r\n'.encode())
-    print(f'{config.username}: {msg}')
+    print(f'< {config.username}: {msg}')
