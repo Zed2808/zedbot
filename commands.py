@@ -28,6 +28,14 @@ class Command():
     def execute(connection, channel, sender, message, mod):
         return 'Base message'
 
+# Sends list of available commands
+class Help(Command):
+    def trigger():
+        return ['!help']
+
+    def execute(connection, channel, sender, message, mod):
+        irc.send_message(connection, channel, f'Commands: {get_names()}')
+
 # Greet the sender in chat
 class Hi(Command):
     def trigger():
