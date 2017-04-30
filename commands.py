@@ -11,7 +11,7 @@ import quotes
 # Example: [(<class 'commands.Hi'>, '!hi'), (<class 'commands.Title'>, '!title')]
 def get_commands():
     class_list = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-    cmds = [(cmd[1], cmd[1].trigger()) for cmd in class_list if cmd[1].trigger() != '']
+    cmds = [(cmd[1], cmd[1].trigger) for cmd in class_list if cmd[1].trigger != ['']]
     return cmds
 
 def get_names():
@@ -22,32 +22,28 @@ def get_names():
 
 # Base Command class to inherit from, not an actual command
 class Command():
-    def trigger():
-        return ''
+    trigger = ['']
 
     def execute(connection, channel, sender, message, mod):
         return 'Base message'
 
 # Sends list of available commands
 class Help(Command):
-    def trigger():
-        return ['!help']
+    trigger = ['!help']
 
     def execute(connection, channel, sender, message, mod):
         irc.send_message(connection, channel, f'Commands: {get_names()}')
 
 # Greet the sender in chat
 class Hi(Command):
-    def trigger():
-        return ['!hi', '!hello']
+    trigger = ['!hi', '!hello']
 
     def execute(connection, channel, sender, message, mod):
         irc.send_message(connection, channel, f'Hi {sender}! <3')
 
 # Change the title of the stream (mod only)
 class Title(Command):
-    def trigger():
-        return ['!title', '!status']
+    trigger = ['!title', '!status']
 
     def execute(connection, channel, sender, message, mod):
         if mod:
@@ -59,8 +55,7 @@ class Title(Command):
 
 # Quote an Overwatch character
 class Quote(Command):
-    def trigger():
-        return ['!genji', '!hanzo', '!mercy']
+    trigger = ['!genji', '!hanzo', '!mercy']
 
     def execute(connection, channel, sender, message, mod):
         message = message.split()
