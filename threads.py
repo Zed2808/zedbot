@@ -5,6 +5,7 @@ import random
 
 import config
 import irc
+import commands
 import twitch
 import quotes
 
@@ -12,6 +13,15 @@ class IRCManager():
     def __init__(self, channel_id, connection):
         self.channel_id = channel_id
         self.connection = connection
+
+        # Get the list of commands
+        self.command_list = commands.get_commands()
+
+        # Print available commands
+        command_names = [cmd[1] for cmd in self.command_list]
+        command_names = ['/'.join(cmd) for cmd in command_names]
+        command_names = ' '.join(command_names)
+        print(f'Commands: {command_names}')
 
     def run(self):
         # Ask the IRC server for a list of channel mods
@@ -46,7 +56,10 @@ class IRCManager():
                             self.mods = [user.lstrip() for user in users]
                             # Add the channel owner to list of mods
                             self.mods.append(config.channel)
-                            print(f'Moderators: {self.mods}')
+
+                            # Print list of mods
+                            mod_names = ' '.join(self.mods)
+                            print(f'Moderators: {mod_names}')
 
                     # If data is a regular chat message
                     if line[1] == 'PRIVMSG':
@@ -55,40 +68,24 @@ class IRCManager():
                         msg = irc.get_message(line)
                         channel = line[2]
 
-                        # Use first word as command
-                        command = msg.split()[0]
+                        # Determine if sender is mod in channel
+                        mod_status = sender in self.mods
 
                         # If sender is a moderator
-                        if sender in self.mods:
+                        if mod_status:
                             print(f'> [M] {sender}: {msg}')
                         else:
                             print(f'> {sender}: {msg}')
 
-                        # !hi
-                        if command == '!hi':
-                            irc.send_message(self.connection, channel, f'Hi {sender}! <3')
+                        # Use first word as command
+                        cmd = msg.split()[0]
 
-                        # !title
-                        if command == '!title' and sender in self.mods:
-                            title = msg.split('!title')[1].lstrip()
-                            print(f'Changing stream title to "{title}"')
-                            twitch.set_stream_title(self.channel_id, title)
-                            irc.send_message(self.connection, channel, f'Set stream title to "{title}"')
-
-                        # !genji
-                        if command == '!genji':
-                            quote = random.choice(quotes.genji)
-                            irc.send_message(self.connection, channel, quote)
-
-                        # !hanzo
-                        if command == '!hanzo':
-                            quote = random.choice(quotes.hanzo)
-                            irc.send_message(self.connection, channel, quote)
-
-                        # !mercy
-                        if command == '!mercy':
-                            quote = random.choice(quotes.mercy)
-                            irc.send_message(self.connection, channel, quote)
+                        # Iterate through each command
+                        for command in self.command_list:
+                            # If the command's trigger word matches the first word in the message
+                            if cmd in command[1]:
+                                # Execute the matching command
+                                command[0].execute(self.connection, channel, sender, msg, mod_status)
 
             except socket.error:
                 print('SOCKET ERROR')
