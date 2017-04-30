@@ -5,9 +5,13 @@ import config
 import irc
 import twitch
 import threads
+import games
 
 # Get Twitch channel id
 channel_id = twitch.get_channel_id(config.channel)
+
+# Initialize game stuff
+games.init_games()
 
 ##############################################
 # Set up IRC communications with Twitch chat #

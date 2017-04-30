@@ -6,6 +6,7 @@ import config
 import irc
 import twitch
 import quotes
+import games
 
 # Return a list of commands along with their trigger words
 # Example: [(<class 'commands.Hi'>, '!hi'), (<class 'commands.Title'>, '!title')]
@@ -71,3 +72,31 @@ class Quote(Command):
             print(f'Quoting "{character}"')
 
         irc.send_message(connection, channel, quote)
+
+# Check credit balance
+class Balance(Command):
+    trigger = ['!balance']
+
+    def execute(connection, channel, sender, message, mod):
+        # Get credit balance for user
+        balance = games.balance(sender)
+
+        irc.send_message(connection, channel, f'{sender}\'s balance: {balance}')
+
+# Manually set a user's balance (mod only)
+class SetBalance(Command):
+    trigger = ['!setbalance']
+
+    def execute(connection, channel, sender, message, mod):
+        if mod:
+            message = message.split()
+            if len(message) >= 3:
+                user = message[1]
+                balance = message[2]
+                games.set_balance(user, balance)
+
+                irc.send_message(connection, channel, f'Set {user}\'s balance to {balance}')
+            else:
+                irc.send_message(connection, channel, f'{sender}: this command requires additional arguments')
+        else:
+            irc.send_message(connection, channel, f'{sender}: this command is mod only')
