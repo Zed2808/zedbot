@@ -100,3 +100,12 @@ class SetBalance(Command):
                 irc.send_message(connection, channel, f'{sender}: this command requires additional arguments')
         else:
             irc.send_message(connection, channel, f'{sender}: this command is mod only')
+
+class Spin(Command):
+    trigger = ['!spin']
+
+    def execute(connection, channel, sender, message, mod):
+        messages = games.spin_slots(sender)
+
+        for message in messages:
+            irc.send_message(connection, channel, message)
