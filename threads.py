@@ -18,10 +18,7 @@ class IRCManager():
         self.command_list = commands.get_commands()
 
         # Print available commands
-        command_names = [cmd[1] for cmd in self.command_list]
-        command_names = ['/'.join(cmd) for cmd in command_names]
-        command_names = ' '.join(command_names)
-        print(f'Commands: {command_names}')
+        print(f'Commands: {commands.get_names()}')
 
     def run(self):
         # Ask the IRC server for a list of channel mods

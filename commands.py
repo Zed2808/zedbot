@@ -14,6 +14,12 @@ def get_commands():
     cmds = [(cmd[1], cmd[1].trigger()) for cmd in class_list if cmd[1].trigger() != '']
     return cmds
 
+def get_names():
+    command_names = [cmd[1] for cmd in get_commands()]
+    command_names = ['/'.join(cmd) for cmd in command_names]
+    command_names = ' '.join(command_names)
+    return command_names
+
 # Base Command class to inherit from, not an actual command
 class Command():
     def trigger():
