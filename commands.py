@@ -55,11 +55,19 @@ class Title(Command):
 
 # Quote an Overwatch character
 class Quote(Command):
-    trigger = ['!genji', '!hanzo', '!mercy']
+    trigger = ['!quote', '!genji', '!hanzo', '!mercy']
 
     def execute(connection, channel, sender, message, mod):
-        message = message.split()
-        character = message[0].lstrip('!')
-        print(f'Quoting "{character}"')
-        quote = random.choice(quotes.quotes[character])
+        character = message.split()[0].lstrip('!')
+
+        # If "!quote", pick a totally random quote
+        if character == 'quote':
+            quote_list = [quotes.quotes[key] for key in quotes.quotes]
+            quote_list = [quote for char_quotes in quote_list for quote in char_quotes]
+            quote = random.choice(quote_list)
+            print('Quoting random character')
+        else:
+            quote = random.choice(quotes.quotes[character])
+            print(f'Quoting "{character}"')
+
         irc.send_message(connection, channel, quote)
